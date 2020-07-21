@@ -21,6 +21,8 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { WebView } from 'react-native-webview';
 
+import { RNCamera } from 'react-native-camera';
+
 import {
   Header,
   LearnMoreLinks,
@@ -30,6 +32,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 const App: () => React$Node = () => {
+  const [cameraOn, setCameraOn] = useState(false);
   const [content, setContent] = useState("This is Content Body");
 
   // Footer Functions 
@@ -67,6 +70,19 @@ const App: () => React$Node = () => {
           </TouchableHighlight>
         </View>
       </View>
+      
+        cameraOn ? (<RNCamera
+        ref={ref => {
+          this.camera = ref;
+        }}
+        style={{
+          flex: 1,
+          width: '100%',
+        }}
+      >): ""
+      
+      
+      </RNCamera>
     </SafeAreaView>
   );
 };
