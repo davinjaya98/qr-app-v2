@@ -10,6 +10,8 @@ target 'QrAppV2' do
 
   pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+  pod 'RNSVG', :path => '../node_modules/react-native-svg'
+
   target 'QrAppV2Tests' do
     inherit! :complete
     # Pods for testing

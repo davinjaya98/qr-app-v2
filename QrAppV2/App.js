@@ -13,7 +13,7 @@ import {
   ScrollView,
   View,
   Text,
-  StatusBar,
+  ImageBackground,
   Image,
   TouchableHighlight
 } from 'react-native';
@@ -22,6 +22,8 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { WebView } from 'react-native-webview';
 
 import { RNCamera } from 'react-native-camera';
+
+import Bg from './assets/bg/foam-cyan.svg';
 
 import {
   Header,
@@ -33,16 +35,46 @@ import {
 
 const App: () => React$Node = () => {
   const [cameraOn, setCameraOn] = useState(false);
-  const [content, setContent] = useState("This is Content Body");
+  // const [content, setContent] = useState("https://github.com/facebook/react-native");
+  const [content, setContent] = useState("");
 
   // Footer Functions 
 
   const triggerScanner = () => {
     console.log("Triggering Scanner");
+    setCameraOn(!cameraOn);
   }
 
   const toggleSettingMenu = () => {
     console.log("Toggling Setting");
+  }
+
+  const renderContent = () => {
+    if (content) {
+      return (
+        <WebView source={{ uri: content }} />
+      );
+    }
+    else {
+      return (
+        <ImageBackground source={require('./assets/bg/foam-cyan.svg')} style={contentStyles.defaultBg}>
+          <Text>Please scan the QR Code using the button below</Text>
+        </ImageBackground>
+      );
+    }
+  }
+
+  const showContentOrCamera = () => {
+    if (cameraOn) {
+      return (
+        <RNCamera ref={ref => { this.camera = ref; }} style={{ flex: 1, width: '100%', }}></RNCamera>
+      );
+    }
+    else {
+      return (
+        renderContent()
+      );
+    }
   }
 
   return (
@@ -51,38 +83,27 @@ const App: () => React$Node = () => {
         {/* Header */}
         <View style={headerStyles.container}>
           <Image source={require('./assets/logo/logo-black.png')} style={headerStyles.logo}></Image>
-          <Icon name={'bars'} style={headerStyles.icons} />
+          {/* <Bg /> */}
+          <TouchableHighlight onPress={toggleSettingMenu}>
+            <View>
+              <Icon name={'bars'} style={headerStyles.icons} />
+            </View>
+          </TouchableHighlight>
         </View>
-        {/* Content */}
+        {/* Content / Camera */}
         <View style={contentStyles.container}>
-          <WebView
-            source={{
-              uri: 'https://github.com/facebook/react-native'
-            }}
-          />
+          {/* Call a function to determine which function to show  */}
+          {showContentOrCamera()}
         </View>
         {/* Footer */}
         <View style={footerStyles.container}>
           <TouchableHighlight onPress={triggerScanner} style={footerStyles.scannerView}>
             <View>
-              <Icon name={'qrcode'} style={footerStyles.scannerIcon} />
+              <Icon name={cameraOn ? 'times-circle' : 'qrcode'} style={footerStyles.scannerIcon} />
             </View>
           </TouchableHighlight>
         </View>
       </View>
-      
-        cameraOn ? (<RNCamera
-        ref={ref => {
-          this.camera = ref;
-        }}
-        style={{
-          flex: 1,
-          width: '100%',
-        }}
-      >): ""
-      
-      
-      </RNCamera>
     </SafeAreaView>
   );
 };
@@ -120,8 +141,13 @@ const headerStyles = StyleSheet.create({
 const contentStyles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: 'red',
+    // backgroundColor: 'red',
   },
+  defaultBg: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center"
+  }
 });
 
 const footerStyles = StyleSheet.create({
