@@ -1,0 +1,4 @@
+#Fri Jul 24 12:26:28 SGT 2020
+base.0=D\:\\On-Going-Project\\Personal\\qr-app\\qr-app-v2\\QrAppV2\\android\\app\\build\\intermediates\\dex\\debug\\mergeDexDebug\\out\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
