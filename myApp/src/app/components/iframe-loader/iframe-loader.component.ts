@@ -20,13 +20,9 @@ export class IframeLoaderComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     for (const propName in changes) {
       const chng = changes[propName];
-      // const cur  = JSON.stringify(chng.currentValue);
-      // const prev = JSON.stringify(chng.previousValue);
       if(propName == "url") {
         this.pageUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.url);
       }
-      
-      // console.log(`${propName}: currentValue = ${cur}, previousValue = ${prev}`);
     }
   }
 

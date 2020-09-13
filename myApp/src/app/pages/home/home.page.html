@@ -1,15 +1,17 @@
-<!--<ion-header>
-  <ion-navbar>
-    <ion-title>
-      Qr Scanner
-    </ion-title>
-  </ion-navbar>
-</ion-header>-->
-
 <ion-content [fullscreen]="true">
   <!-- Text Block -->
   <!-- <comp-text-block label="Press the Scan button on the bottom to start scanning"></comp-text-block> -->
+  <!-- Text Block -->
   <div class="custom-iframe-wrapper">
-    <comp-iframe-loader url="http://dcatalyst.biz"></comp-iframe-loader>
+    <!-- Floating Button -->
+    <ion-fab vertical="center" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="triggerScanner()">
+        <ion-icon name="scan-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+    <!-- Floating Button -->
+    <!-- IFrame -->
+    <comp-iframe-loader [url]="iframeUrl"></comp-iframe-loader>
+    <!-- IFrame -->
   </div>
 </ion-content>

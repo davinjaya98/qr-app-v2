@@ -12,7 +12,6 @@ import { HomePageRoutingModule } from './home-routing.module';
 
 //Custom Components
 import { TextBlockComponentModule } from '../../components/text-block/text-block.module';
-import { ExploreContainerComponentModule } from '../../explore-container/explore-container.module';
 import { IframeLoaderComponentModule } from '../../components/iframe-loader/iframe-loader.module';
 
 @NgModule({
@@ -22,7 +21,6 @@ import { IframeLoaderComponentModule } from '../../components/iframe-loader/ifra
     IonicModule,
     HomePageRoutingModule,
     TextBlockComponentModule,
-    ExploreContainerComponentModule,
     IframeLoaderComponentModule,
   ],
   declarations: [HomePage]

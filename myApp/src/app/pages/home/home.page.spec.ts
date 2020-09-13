@@ -6,7 +6,6 @@ import { HomePage } from './home.page';
 
 //Custom Components
 import { TextBlockComponentModule } from '../../components/text-block/text-block.module';
-import { ExploreContainerComponentModule } from '../../explore-container/explore-container.module';
 import { IframeLoaderComponentModule } from '../../components/iframe-loader/iframe-loader.module';
 
 describe('HomePage', () => {
@@ -16,7 +15,7 @@ describe('HomePage', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [HomePage],
-      imports: [IonicModule.forRoot(), TextBlockComponentModule, ExploreContainerComponentModule, IframeLoaderComponentModule]
+      imports: [IonicModule.forRoot(), TextBlockComponentModule, IframeLoaderComponentModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomePage);

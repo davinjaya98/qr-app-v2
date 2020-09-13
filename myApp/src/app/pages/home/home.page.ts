@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { ScannerUtil } from '../../util/scanner/scanner';
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -10,4 +12,9 @@ export class HomePage {
 
   constructor() {}
 
+  triggerScanner = function() {
+    ScannerUtil.triggerScanner((url) => {
+      this.iframeUrl = url;
+    });
+  }
 }
