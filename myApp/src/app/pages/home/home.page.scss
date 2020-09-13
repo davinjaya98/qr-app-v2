@@ -1,0 +1,38 @@
+ion-content {
+    .custom-iframe-wrapper {
+        position: absolute;
+        // bottom: 56px; /* So iframe is on top of the tabs */
+        bottom: 0;
+        right: 0;
+        left: 0;
+        top: 0;
+    }
+    .custom-button-wrapper {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        min-height: 5rem;
+        ion-row {
+            height: 9rem;
+        }
+        .custom-scan-button {
+            img {
+                width: 5rem;
+                height: 5rem;
+            }
+            span {
+                display: block;
+                margin-top: 0.5rem;
+                font-size: 1.5rem;
+                font-weight: 500;
+            }
+        }
+        .custom-setting-button {
+            img {
+                width: 4.5rem;
+                height: 4.5rem;
+            }
+        }
+    }
+}
