@@ -1,4 +1,5 @@
 import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-scanner/ngx';
+import { HTTP } from '@ionic-native/http/ngx';
 
 // import { DCatalystDecryptor } from 'capacitor-plugin-dcatalyst-decryptor';
 import { Plugins } from '@capacitor/core';
@@ -30,14 +31,11 @@ export class ScannerUtil {
         };
 
         this.barcodeCtrl.scan(options).then(barcodeData => {
-            // console.log('Barcode data', barcodeData);
-
             //Need to trigger the decrypt function first
             // instantiate new self 
             let scannerUtil = new ScannerUtil();
             scannerUtil.customDecryptLogic(barcodeData.text).then(function (decryptedData) {
                 //Trigger the callback function
-                console.log("Data ready to be send to dcatalyst side");
                 callback(decryptedData);
             })
 
@@ -48,58 +46,51 @@ export class ScannerUtil {
 
     customDecryptLogic = function (dataToDecrypt) {
         return new Promise((resolve, reject) => {
-            console.log("Triggering plugin");
-            DCatalystDecryptor.decrypt({"data": dataToDecrypt}).then((echoReturn) => {
-                console.log("Plugin finish trigger", echoReturn);
-                resolve(echoReturn);
-            });
-            // try {
-            //     Hello.decrypt(
-            //         dataToDecrypt,
-            //         (decryptedData) => {
-            //             this.scanResult = decryptedData;
-            //             //Got the decrypted data back
-            //             //decryptedData = "70lyt3sBjFg3KlMScP2SJe3kRyZWHF1Pa48yb_b3Vw4";
+            //Use dcatalyst plugin to do the first round decryption
+            try {
+                DCatalystDecryptor.decrypt({ "data": dataToDecrypt }).then((firstRoundDecrypted) => {
+                    console.log("Plugin finish trigger", firstRoundDecrypted);
+                    let jsonData = {
+                        "data": JSON.stringify({
+                            // "location": this.location,
+                            // "personInCharge": this.personInCharge,
+                            // "imei": this.imei,
+                            // "phoneNumber": this.phoneNumber,
+                            // "gpsCord": this.latitude + ", " + this.longitude,
+                            // "latitude": this.latitude,
+                            // "longitude": this.longitude,
+                            // "qrValue": firstRoundDecrypted
+                            "location": "Kuala Lumpur",
+                            "personInCharge": "Davin Jaya",
+                            "imei": "Some imei number",
+                            "phoneNumber": "0163906293",
+                            "gpsCord": "latitude" + ", " + "longitude",
+                            "latitude": "latitude",
+                            "longitude": "longitude",
+                            "qrValue": firstRoundDecrypted
+                        })
+                    }
     
-            //             // let jsonData = {
-            //             //     "data": JSON.stringify({
-            //             //         "location": this.location,
-            //             //         "personInCharge": this.personInCharge,
-            //             //         "imei": this.imei,
-            //             //         "phoneNumber": this.phoneNumber,
-            //             //         "gpsCord": this.latitude + ", " + this.longitude,
-            //             //         "latitude": this.latitude,
-            //             //         "longitude": this.longitude,
-            //             //         "qrValue": decryptedData
-            //             //     })
-            //             // }
-    
-            //             // //Post the data to backend for the second decryption
-            //             // //URL, Request Body, Request Header
-            //             // this.http.post(this.connectedHost + this.decryptEndpoint, jsonData,
-            //             //     {
-            //             //         headers: 'Content-Type : application/x-www-form-urlencoded'
-            //             //     }).then(data => {
-            //             //         //Set the data to an object for frontend massaging
-            //             //         this.qrResult.pageUrl = data.data;
-            //             //         //this.qrResult.pageUrl = this.sanitizer.bypassSecurityTrustResourceUrl(data.data);
-            //             //         this.qrResult.success = true;
-            //             //     }).catch(error => {
-            //             //         this.openToast(JSON.stringify(error));
-            //             //     });
-    
-    
-            //             /*this.qrResult.pageUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.connectedHost + this.decryptEndpoint);
-            //             this.qrResult.success = true;*/
-            //         },
-            //         (err) => {
-            //             this.openToast(JSON.stringify(this.qrDecryptError));
-            //         }
-            //     )
-            //     resolve();
-            // }catch(e) {
-            //     reject(e);
-            // }
+                    //Post the data to backend for the second decryption
+                    //URL, Request Body, Request Header
+                    //Instantiate the HTTP object first
+                    let httpUtil = new HTTP();
+
+                    // this.http.post(this.connectedHost + this.decryptEndpoint, jsonData,
+                    httpUtil.post("https://d.dcatalyst.biz/" + "q", jsonData,
+                        {
+                            headers: 'Content-Type : application/x-www-form-urlencoded'
+                        }).then(data => {
+                            // this.qrResult.pageUrl = data.data;
+                            // Resolve with the final decrypted data
+                            resolve(data.data);
+                        }).catch(error => {
+                            this.openToast(JSON.stringify(error));
+                        });
+                });
+            }catch(e) {
+                reject(e);
+            }
         });
     }
 }
