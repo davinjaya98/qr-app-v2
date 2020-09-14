@@ -14,8 +14,8 @@ export class DCatalystDecryptorWeb extends WebPlugin implements DCatalystDecrypt
     return options;
   }
 
-  async decrypt(data: string): Promise<string> {
-    console.log('DECRYPT', data)
+  async decrypt(options: { data: string }): Promise<string> {
+    console.log('DECRYPT', options.data)
     return "Unable to decrypt in web mode";
   }
 }

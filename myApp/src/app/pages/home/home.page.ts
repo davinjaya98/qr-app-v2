@@ -17,8 +17,4 @@ export class HomePage {
       this.iframeUrl = url;
     });
   }
-
-  triggerSample= function() {
-    ScannerUtil.triggerSamplePlugin();
-  }
 }

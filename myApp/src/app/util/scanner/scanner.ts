@@ -33,7 +33,9 @@ export class ScannerUtil {
             // console.log('Barcode data', barcodeData);
 
             //Need to trigger the decrypt function first
-            this.customDecryptLogic(barcodeData.text).then(function (decryptedData) {
+            // instantiate new self 
+            let scannerUtil = new ScannerUtil();
+            scannerUtil.customDecryptLogic(barcodeData.text).then(function (decryptedData) {
                 //Trigger the callback function
                 console.log("Data ready to be send to dcatalyst side");
                 callback(decryptedData);
@@ -44,19 +46,10 @@ export class ScannerUtil {
         });
     }
 
-    static triggerSamplePlugin = function() {
-        // instantiate new self 
-        let scannerUtil = new ScannerUtil();
-        scannerUtil.customDecryptLogic("Test Data").then(function (decryptedData) {
-            //Trigger the callback function
-            console.log("Data ready to be send to dcatalyst side", decryptedData);
-        })
-    }
-
     customDecryptLogic = function (dataToDecrypt) {
         return new Promise((resolve, reject) => {
             console.log("Triggering plugin");
-            DCatalystDecryptor.decrypt("Echoing inside" ).then((echoReturn) => {
+            DCatalystDecryptor.decrypt({"data": dataToDecrypt}).then((echoReturn) => {
                 console.log("Plugin finish trigger", echoReturn);
                 resolve(echoReturn);
             });

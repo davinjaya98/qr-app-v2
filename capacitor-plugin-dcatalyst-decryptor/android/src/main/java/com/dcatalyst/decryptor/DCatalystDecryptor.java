@@ -30,13 +30,14 @@ public class DCatalystDecryptor extends Plugin {
         
         String result = "empty";
         try {
-            result = Handler.decryptStr(Base64.decode(result.getBytes(), Base64.URL_SAFE),false).getStr();
+            result = Handler.decryptStr(Base64.decode(data.getBytes(), Base64.URL_SAFE),false).getStr();
         }catch(Exception e) {
             result = e.toString();
         }
 
         JSObject ret = new JSObject();
         ret.put("result", result);
+        ret.put("input data", data);
 
         call.success(ret);
     }
