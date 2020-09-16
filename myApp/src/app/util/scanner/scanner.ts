@@ -1,12 +1,12 @@
 import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-scanner/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
+import { ToastController } from '@ionic/angular';
 
-// import { DCatalystDecryptor } from 'capacitor-plugin-dcatalyst-decryptor';
-import { Plugins } from '@capacitor/core';
+//All custom capacitor plugin can be accessed from this class
+import { Plugins, Storage } from '@capacitor/core';
 
+//Implement the interface here
 const { DCatalystDecryptor } = Plugins
-
-// declare var Hello: any;
 
 export class ScannerUtil {
     //Declare barcode scanner class first
@@ -50,47 +50,62 @@ export class ScannerUtil {
             try {
                 DCatalystDecryptor.decrypt({ "data": dataToDecrypt }).then((firstRoundDecrypted) => {
                     console.log("Plugin finish trigger", firstRoundDecrypted);
-                    let jsonData = {
-                        "data": JSON.stringify({
-                            // "location": this.location,
-                            // "personInCharge": this.personInCharge,
-                            // "imei": this.imei,
-                            // "phoneNumber": this.phoneNumber,
-                            // "gpsCord": this.latitude + ", " + this.longitude,
-                            // "latitude": this.latitude,
-                            // "longitude": this.longitude,
-                            // "qrValue": firstRoundDecrypted
-                            "location": "Kuala Lumpur",
-                            "personInCharge": "Davin Jaya",
-                            "imei": "Some imei number",
-                            "phoneNumber": "0163906293",
-                            "gpsCord": "latitude" + ", " + "longitude",
-                            "latitude": "latitude",
-                            "longitude": "longitude",
-                            "qrValue": firstRoundDecrypted
-                        })
-                    }
-    
-                    //Post the data to backend for the second decryption
-                    //URL, Request Body, Request Header
-                    //Instantiate the HTTP object first
-                    let httpUtil = new HTTP();
-
-                    // this.http.post(this.connectedHost + this.decryptEndpoint, jsonData,
-                    httpUtil.post("https://d.dcatalyst.biz/" + "q", jsonData,
-                        {
-                            headers: 'Content-Type : application/x-www-form-urlencoded'
-                        }).then(data => {
-                            // this.qrResult.pageUrl = data.data;
-                            // Resolve with the final decrypted data
-                            resolve(data.data);
-                        }).catch(error => {
-                            this.openToast(JSON.stringify(error));
-                        });
+                    Storage.get({ key: 'setting' }).then(({ value }) => {
+                        if (value) {
+                            let setting = JSON.parse(value);
+                            let jsonData = {
+                                "data": JSON.stringify({
+                                    "location": setting.location,
+                                    "personInCharge": setting.personInCharge,
+                                    // "imei": this.imei,
+                                    // "phoneNumber": this.phoneNumber,
+                                    // "gpsCord": this.latitude + ", " + this.longitude,
+                                    // "latitude": this.latitude,
+                                    // "longitude": this.longitude,
+                                    "imei": "Some imei number",
+                                    "phoneNumber": "0163906293",
+                                    "gpsCord": "latitude" + ", " + "longitude",
+                                    "latitude": "latitude",
+                                    "longitude": "longitude",
+                                    "qrValue": firstRoundDecrypted.result
+                                })
+                            }
+        
+                            //Post the data to backend for the second decryption
+                            //URL, Request Body, Request Header
+                            //Instantiate the HTTP object first
+                            let httpUtil = new HTTP();
+        
+                            this.http.post(setting.connectedHost + setting.decryptEndpoint, jsonData,
+                            // httpUtil.post("http://d.dcatalyst.biz:4007" + "/qr", jsonData,
+                                {
+                                    headers: 'Content-Type : application/x-www-form-urlencoded'
+                                }).then(data => {
+                                    resolve(data.data);
+                                }).catch(error => {
+                                    let scannerUtil = new ScannerUtil();
+                                    scannerUtil.triggerToast(JSON.stringify(error));
+                                });
+                        }
+                        else {
+                            let scannerUtil = new ScannerUtil();
+                            scannerUtil.triggerToast("Please setup the base setting on setting page first!");
+                        }
+                    })
                 });
-            }catch(e) {
+            } catch (e) {
                 reject(e);
             }
         });
+    }
+
+    async triggerToast(message) {
+        let toastCtrl = new ToastController();
+        const toast = await toastCtrl.create({
+            message: message,
+            duration: 2000
+        });
+
+        toast.present();
     }
 }
