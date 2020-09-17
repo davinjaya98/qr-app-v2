@@ -2,8 +2,11 @@ import { BarcodeScanner, BarcodeScannerOptions } from '@ionic-native/barcode-sca
 import { HTTP } from '@ionic-native/http/ngx';
 import { ToastController } from '@ionic/angular';
 
+//Custom Service
+import { StorageService } from '../../service/storage';
+
 //All custom capacitor plugin can be accessed from this class
-import { Plugins, Storage } from '@capacitor/core';
+import { Plugins } from '@capacitor/core';
 
 //Implement the interface here
 const { DCatalystDecryptor } = Plugins
@@ -50,47 +53,86 @@ export class ScannerUtil {
             try {
                 DCatalystDecryptor.decrypt({ "data": dataToDecrypt }).then((firstRoundDecrypted) => {
                     console.log("Plugin finish trigger", firstRoundDecrypted);
-                    Storage.get({ key: 'setting' }).then(({ value }) => {
-                        if (value) {
-                            let setting = JSON.parse(value);
-                            let jsonData = {
-                                "data": JSON.stringify({
-                                    "location": setting.location,
-                                    "personInCharge": setting.personInCharge,
-                                    // "imei": this.imei,
-                                    // "phoneNumber": this.phoneNumber,
-                                    // "gpsCord": this.latitude + ", " + this.longitude,
-                                    // "latitude": this.latitude,
-                                    // "longitude": this.longitude,
-                                    "imei": "Some imei number",
-                                    "phoneNumber": "0163906293",
-                                    "gpsCord": "latitude" + ", " + "longitude",
-                                    "latitude": "latitude",
-                                    "longitude": "longitude",
-                                    "qrValue": firstRoundDecrypted.result
-                                })
-                            }
-        
-                            //Post the data to backend for the second decryption
-                            //URL, Request Body, Request Header
-                            //Instantiate the HTTP object first
-                            let httpUtil = new HTTP();
-        
-                            this.http.post(setting.connectedHost + setting.decryptEndpoint, jsonData,
+                    // Storage.get({ key: 'location' }).then(({ value }) => {
+                    //     if (value) {
+                    //         let location = JSON.parse(value);
+                    //         Storage.get({ key: 'setting' }).then(({ value }) => {
+                    //             if (value) {
+                    //                 let setting = JSON.parse(value);
+                    //                 let jsonData = {
+                    //                     "data": JSON.stringify({
+                    //                         "location": setting.location,
+                    //                         "personInCharge": setting.personInCharge,
+                    //                         // "imei": this.imei,
+                    //                         // "phoneNumber": this.phoneNumber,
+                    //                         "gpsCord": location.latitude + ", " + location.longitude,
+                    //                         "latitude": location.latitude,
+                    //                         "longitude": location.longitude,
+                    //                         "imei": "Some imei number",
+                    //                         "phoneNumber": "0163906293",
+                    //                         "qrValue": firstRoundDecrypted.result
+                    //                     })
+                    //                 }
+
+                    //                 //Post the data to backend for the second decryption
+                    //                 //URL, Request Body, Request Header
+                    //                 //Instantiate the HTTP object first
+                    //                 let httpUtil = new HTTP();
+
+                    //                 httpUtil.post(setting.connectedHost + setting.decryptEndpoint, jsonData,
+                    //                     // httpUtil.post("http://d.dcatalyst.biz:4007" + "/qr", jsonData,
+                    //                     {
+                    //                         headers: 'Content-Type : application/x-www-form-urlencoded'
+                    //                     }).then(data => {
+                    //                         resolve(data.data);
+                    //                     }).catch(error => {
+                    //                         let scannerUtil = new ScannerUtil();
+                    //                         scannerUtil.triggerToast(JSON.stringify(error));
+                    //                     });
+                    //             }
+                    //             else {
+                    //                 let scannerUtil = new ScannerUtil();
+                    //                 scannerUtil.triggerToast("Please setup the base setting on setting page first!");
+                    //             }
+                    //         });
+                    //     }
+                    //     else {
+                    //         let scannerUtil = new ScannerUtil();
+                    //         scannerUtil.triggerToast("Please setup the base setting on setting page first!");
+                    //     }
+                    // })
+                    let scannerUtil = new ScannerUtil();
+                    scannerUtil.getAllStorageData().then((setting: any) => {
+                        let jsonData = {
+                            "data": JSON.stringify({
+                                "location": setting.location,
+                                "personInCharge": setting.personInCharge,
+                                // "imei": this.imei,
+                                // "phoneNumber": this.phoneNumber,
+                                "gpsCord": setting.latitude + ", " + setting.longitude,
+                                "latitude": setting.latitude,
+                                "longitude": setting.longitude,
+                                // "imei": "Some imei number",
+                                // "phoneNumber": "0163906293",
+                                "qrValue": firstRoundDecrypted.result
+                            })
+                        }
+    
+                        //Post the data to backend for the second decryption
+                        //URL, Request Body, Request Header
+                        //Instantiate the HTTP object first
+                        let httpUtil = new HTTP();
+    
+                        httpUtil.post(setting.connectedHost + setting.decryptEndpoint, jsonData,
                             // httpUtil.post("http://d.dcatalyst.biz:4007" + "/qr", jsonData,
-                                {
-                                    headers: 'Content-Type : application/x-www-form-urlencoded'
-                                }).then(data => {
-                                    resolve(data.data);
-                                }).catch(error => {
-                                    let scannerUtil = new ScannerUtil();
-                                    scannerUtil.triggerToast(JSON.stringify(error));
-                                });
-                        }
-                        else {
-                            let scannerUtil = new ScannerUtil();
-                            scannerUtil.triggerToast("Please setup the base setting on setting page first!");
-                        }
+                            {
+                                headers: 'Content-Type : application/x-www-form-urlencoded'
+                            }).then(data => {
+                                resolve(data.data);
+                            }).catch(error => {
+                                let scannerUtil = new ScannerUtil();
+                                scannerUtil.triggerToast(JSON.stringify(error));
+                            });
                     })
                 });
             } catch (e) {
@@ -107,5 +149,47 @@ export class ScannerUtil {
         });
 
         toast.present();
+    }
+
+    async getAllStorageData() {
+        let storage = new StorageService();
+        const getLocation = new Promise((resolve, reject) => {
+            storage.getObject('location').then((location) => {
+                if (location) {
+                    // let location = JSON.parse(value);
+
+                    resolve(location);
+                }
+                else {
+                    let scannerUtil = new ScannerUtil();
+                    scannerUtil.triggerToast("Please accept the location setting on page load first!");
+                }
+            });
+        });
+        const getSetting = new Promise((resolve, reject) => {
+            storage.getObject('setting').then((setting) => {
+                if (setting) {
+                    // let setting = JSON.parse(value);
+
+                    resolve(setting);
+                }
+                else {
+                    let scannerUtil = new ScannerUtil();
+                    scannerUtil.triggerToast("Please setup the base setting on setting page first!");
+                }
+            });
+        });
+
+        return Promise.all([getLocation, getSetting]).then((values) => {
+            //Merge value into single object from array
+            let mergedSetting = {}
+            values.forEach((value: Object) => {
+                mergedSetting = {
+                    ...mergedSetting,
+                    ...value
+                }
+            })
+            return mergedSetting;
+        });
     }
 }

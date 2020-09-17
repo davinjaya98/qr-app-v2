@@ -2,11 +2,8 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastController, AlertController } from '@ionic/angular';
 
-//All custom capacitor plugin can be accessed from this class
-import { Plugins } from '@capacitor/core';
-
-//Implement the interface here
-const { Storage } = Plugins
+//Custom Service
+import { StorageService } from '../../service/storage';
 
 @Component({
   selector: 'comp-setting-form',
@@ -23,16 +20,16 @@ export class SettingFormComponent implements OnInit {
 
   settingForm: FormGroup;
 
-  constructor(formBuilder: FormBuilder, public toastCtrl: ToastController, public alertCtrl: AlertController) {
+  constructor(formBuilder: FormBuilder, public toastCtrl: ToastController, public alertCtrl: AlertController, private storage: StorageService) {
     this.settingForm = formBuilder.group({
       hostName: ['', Validators.required],
       endpoint: ['', Validators.required],
       location: ['', Validators.required],
       pic: ['', Validators.required]
     });
-    Storage.get({ key: 'setting' }).then(({ value }) => {
-      if (value) {
-        let setting = JSON.parse(value);
+    this.storage.getObject('setting').then((setting: any) => {
+      if (setting) {
+        // let setting = JSON.parse(value);
         //Update form with value from storage
         this.settingForm.controls.hostName.setValue(setting.connectedHost);
         this.settingForm.controls.endpoint.setValue(setting.decryptEndpoint);
@@ -53,14 +50,11 @@ export class SettingFormComponent implements OnInit {
 
   async saveSetting() {
     new Promise((resolve, reject) => {
-      Storage.set({
-        key: 'setting',
-        value: JSON.stringify({
-          connectedHost: this.settingForm.value.hostName,
-          decryptEndpoint: this.settingForm.value.endpoint,
-          location: this.settingForm.value.location,
-          personInCharge: this.settingForm.value.pic
-        })
+      this.storage.setObject('setting', {
+        connectedHost: this.settingForm.value.hostName,
+        decryptEndpoint: this.settingForm.value.endpoint,
+        location: this.settingForm.value.location,
+        personInCharge: this.settingForm.value.pic
       }).then(() => {
         this.triggerToast("Save successfully");
         resolve(true);
