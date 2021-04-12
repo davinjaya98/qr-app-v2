@@ -117,22 +117,27 @@ export class ScannerUtil {
                                 "qrValue": firstRoundDecrypted.result
                             })
                         }
-    
+
                         //Post the data to backend for the second decryption
                         //URL, Request Body, Request Header
                         //Instantiate the HTTP object first
                         let httpUtil = new HTTP();
-    
-                        httpUtil.post(setting.connectedHost + setting.decryptEndpoint, jsonData,
-                            // httpUtil.post("http://d.dcatalyst.biz:4007" + "/qr", jsonData,
-                            {
-                                headers: 'Content-Type : application/x-www-form-urlencoded'
-                            }).then(data => {
-                                resolve(data.data);
-                            }).catch(error => {
-                                let scannerUtil = new ScannerUtil();
-                                scannerUtil.triggerToast(JSON.stringify(error));
-                            });
+                        httpUtil.setServerTrustMode('nocheck').then(() => {
+                            console.log('success!');
+                            httpUtil.post(setting.connectedHost + setting.decryptEndpoint, jsonData,
+                                // httpUtil.post("http://d.dcatalyst.biz:4007" + "/qr", jsonData,
+                                {
+                                    headers: 'Content-Type : application/x-www-form-urlencoded',
+                                    'X-XSRF-TOKEN': this.getCookie("XSRF-TOKEN")
+                                }).then(data => {
+                                    resolve(data.data);
+                                }).catch(error => {
+                                    let scannerUtil = new ScannerUtil();
+                                    scannerUtil.triggerToast(JSON.stringify(error));
+                                });
+                        }, function () {
+                            console.log('error :(');
+                        });
                     })
                 });
             } catch (e) {
@@ -191,5 +196,21 @@ export class ScannerUtil {
             })
             return mergedSetting;
         });
+    }
+
+
+    getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
     }
 }
